@@ -8,6 +8,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// TEMPORARY ROUTE — RUN ONCE TO CREATE TABLE
+app.get('/create-subscribers-table', async (req, res) => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS subscribers (
+        id SERIAL PRIMARY KEY,
+        name TEXT,
+        email TEXT UNIQUE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    res.send('Subscribers table created successfully.');
+  } catch (err) {
+    console.error('Table creation error:', err);
+    res.status(500).send('Error creating table.');
+  }
+});
+
+// SUBSCRIBE ROUTE
 app.post('/api/subscribe', async (req, res) => {
   try {
     const { name, email } = req.body;
@@ -36,6 +56,7 @@ app.post('/api/subscribe', async (req, res) => {
   }
 });
 
+// GET ALL SUBSCRIBERS
 app.get('/api/subscribers', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM subscribers ORDER BY id ASC');
@@ -46,6 +67,7 @@ app.get('/api/subscribers', async (req, res) => {
   }
 });
 
+// DELETE SUBSCRIBER
 app.delete('/api/subscribers/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -68,6 +90,7 @@ app.delete('/api/subscribers/:id', async (req, res) => {
   }
 });
 
+// UPDATE SUBSCRIBER
 app.put('/api/subscribers/:id', async (req, res) => {
   try {
     const { id } = req.params;
