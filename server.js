@@ -11,7 +11,8 @@ app.use(express.json());
 // SUBSCRIBE ROUTE
 app.post('/api/subscribe', async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const email = req.body.email;
+    const name = req.body.name || null;
 
     if (!email) {
       return res.status(400).json({ error: 'Email is required.' });
@@ -19,7 +20,7 @@ app.post('/api/subscribe', async (req, res) => {
 
     const result = await pool.query(
       'INSERT INTO subscribers (name, email) VALUES ($1, $2) RETURNING id, name, email, created_at',
-      [name || null, email]
+      [name, email]
     );
 
     return res.status(201).json({
@@ -36,6 +37,7 @@ app.post('/api/subscribe', async (req, res) => {
     return res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
 
 // GET ALL SUBSCRIBERS
 app.get('/api/subscribers', async (req, res) => {
